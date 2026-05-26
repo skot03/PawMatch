@@ -3,7 +3,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 const VALID_EMAIL = 'admin@admin.pl';
 const VALID_PASSWORD = 'admin';
 
-type Screen = 'login' | 'register' | 'dashboard';
+type Screen = 'login' | 'register' | 'dog-profile' | 'user-profile' | 'dashboard';
 
 type UserRecord = {
   email: string;
@@ -18,12 +18,37 @@ type DogMatch = {
   initials?: string;
 };
 
+type DogProfile = {
+  name: string;
+  breed: string;
+  age: string;
+  weight: string;
+  gender: 'Samiec' | 'Samiczka';
+  energy: 'Niski' | 'Średni' | 'Wysoki';
+};
+
+type UserProfile = {
+  displayName: string;
+  about: string;
+  dogs: DogProfile[];
+};
+
+type ProfilesByEmail = Record<string, UserProfile>;
+
 const STORAGE_KEY = 'pawmatch-users';
+const PROFILE_KEY = 'pawmatch-profiles';
 const SESSION_KEY = 'pawmatch-active-user';
 
-const defaultUsers: UserRecord[] = [
-  { email: VALID_EMAIL, password: VALID_PASSWORD },
-];
+const defaultUsers: UserRecord[] = [{ email: VALID_EMAIL, password: VALID_PASSWORD }];
+
+const defaultDogForm: DogProfile = {
+  name: '',
+  breed: '',
+  age: '',
+  weight: '',
+  gender: 'Samiec',
+  energy: 'Niski',
+};
 
 const walkMeetups: DogMatch[] = [
   { name: 'Max', owner: 'Anna Kowalska', time: '20.05 16:30', avatar: dogAvatarDataUri() },
@@ -74,6 +99,58 @@ function readStoredUsers(): UserRecord[] {
   }
 }
 
+function formatDisplayNameFromEmail(email: string) {
+  const localPart = email.split('@')[0] || 'Użytkownik';
+  return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+}
+
+function createDefaultProfile(email: string): UserProfile {
+  if (email === VALID_EMAIL) {
+    return {
+      displayName: 'Anna Kowalska',
+      about: 'Moje super bio blabla. Opis użytkownika itd. Dłuższy tekst dłuższy tekst.',
+      dogs: [
+        {
+          name: 'Max',
+          breed: 'Pomeranian',
+          age: '3 lata',
+          weight: '7 kg',
+          gender: 'Samiec',
+          energy: 'Niski',
+        },
+      ],
+    };
+  }
+
+  return {
+    displayName: formatDisplayNameFromEmail(email),
+    about: 'Dodaj kilka słów o sobie i o psach, które lubisz spotykać.',
+    dogs: [],
+  };
+}
+
+function readStoredProfiles(): ProfilesByEmail {
+  if (typeof window === 'undefined') {
+    return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+  }
+
+  const rawProfiles = window.localStorage.getItem(PROFILE_KEY);
+
+  if (!rawProfiles) {
+    return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+  }
+
+  try {
+    const parsedProfiles = JSON.parse(rawProfiles) as ProfilesByEmail;
+    return {
+      [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL),
+      ...parsedProfiles,
+    };
+  } catch {
+    return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+  }
+}
+
 function PawLogo() {
   return (
     <svg viewBox="0 0 128 128" className="paw-logo" aria-hidden="true">
@@ -93,20 +170,54 @@ function PawLogo() {
   );
 }
 
+function ProfileAvatar({ badge = false }: { badge?: boolean }) {
+  return (
+    <div className={`profile-avatar${badge ? ' profile-avatar--badge' : ''}`}>
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="profileBase" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#d8dee6" />
+            <stop offset="100%" stopColor="#f0f3f7" />
+          </linearGradient>
+        </defs>
+        <circle cx="60" cy="60" r="58" fill="#c47141" />
+        <circle cx="60" cy="60" r="49" fill="url(#profileBase)" />
+        <path d="M18 66c5-25 25-40 46-40 17 0 30 8 39 20-8 8-17 13-28 14-15 2-25 12-31 29-13-4-23-11-26-23Z" fill="#c8ced6" opacity="0.9" />
+        <circle cx="38" cy="42" r="8" fill="#fff" opacity="0.85" />
+      </svg>
+      {badge ? (
+        <span className="profile-avatar__badge" aria-hidden="true">
+          ✎
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
   const [users, setUsers] = useState<UserRecord[]>(defaultUsers);
+  const [profiles, setProfiles] = useState<ProfilesByEmail>({
+    [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL),
+  });
   const [sessionEmail, setSessionEmail] = useState('');
   const [email, setEmail] = useState(VALID_EMAIL);
   const [password, setPassword] = useState(VALID_PASSWORD);
   const [confirmPassword, setConfirmPassword] = useState(VALID_PASSWORD);
-  const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [dogForm, setDogForm] = useState<DogProfile>(defaultDogForm);
 
   useEffect(() => {
     const storedUsers = readStoredUsers();
+    const storedProfiles = readStoredProfiles();
     setUsers(storedUsers);
+    setProfiles(
+      storedUsers.reduce<ProfilesByEmail>((accumulator, user) => {
+        accumulator[user.email] = storedProfiles[user.email] ?? createDefaultProfile(user.email);
+        return accumulator;
+      }, {}),
+    );
 
     const storedSession = window.localStorage.getItem(SESSION_KEY);
 
@@ -114,6 +225,9 @@ export default function App() {
       setSessionEmail(storedSession);
       setScreen('dashboard');
       setEmail(storedSession);
+      setPassword('');
+    } else {
+      window.localStorage.removeItem(SESSION_KEY);
     }
   }, []);
 
@@ -122,21 +236,32 @@ export default function App() {
   }, [users]);
 
   useEffect(() => {
-    if (screen === 'dashboard' && sessionEmail) {
+    window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
+  }, [profiles]);
+
+  useEffect(() => {
+    if (sessionEmail && screen !== 'login' && screen !== 'register') {
       window.localStorage.setItem(SESSION_KEY, sessionEmail);
     } else {
       window.localStorage.removeItem(SESSION_KEY);
     }
   }, [screen, sessionEmail]);
 
+  const currentProfile = useMemo(() => {
+    if (!sessionEmail) {
+      return null;
+    }
+
+    return profiles[sessionEmail] ?? createDefaultProfile(sessionEmail);
+  }, [profiles, sessionEmail]);
+
   const currentUserLabel = useMemo(() => {
     if (!sessionEmail) {
       return 'Użytkownik';
     }
 
-    const userPrefix = sessionEmail.split('@')[0];
-    return nickname.trim() || userPrefix.charAt(0).toUpperCase() + userPrefix.slice(1);
-  }, [nickname, sessionEmail]);
+    return currentProfile?.displayName ?? formatDisplayNameFromEmail(sessionEmail);
+  }, [currentProfile, sessionEmail]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -154,7 +279,12 @@ export default function App() {
     setError('');
     setSuccess('');
     setSessionEmail(normalizedEmail);
+    setProfiles((currentProfiles) => ({
+      ...currentProfiles,
+      [normalizedEmail]: currentProfiles[normalizedEmail] ?? createDefaultProfile(normalizedEmail),
+    }));
     setScreen('dashboard');
+    setPassword('');
   }
 
   function handleRegister(event: FormEvent<HTMLFormElement>) {
@@ -183,9 +313,42 @@ export default function App() {
     const nextUser = { email: normalizedEmail, password };
     setUsers((currentUsers) => [...currentUsers, nextUser]);
     setSessionEmail(normalizedEmail);
+    setProfiles((currentProfiles) => ({
+      ...currentProfiles,
+      [normalizedEmail]: currentProfiles[normalizedEmail] ?? createDefaultProfile(normalizedEmail),
+    }));
     setError('');
-    setSuccess('Konto zostało utworzone. Możesz się teraz zalogować.');
-    setScreen('dashboard');
+    setSuccess('Konto zostało utworzone. Możesz teraz dodać psa.');
+    setScreen('dog-profile');
+  }
+
+  function handleDogSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!sessionEmail) {
+      return;
+    }
+
+    if (!dogForm.name.trim() || !dogForm.breed.trim()) {
+      setError('Uzupełnij imię i rasę psa.');
+      return;
+    }
+
+    setProfiles((currentProfiles) => {
+      const currentProfileData = currentProfiles[sessionEmail] ?? createDefaultProfile(sessionEmail);
+      return {
+        ...currentProfiles,
+        [sessionEmail]: {
+          ...currentProfileData,
+          dogs: [...currentProfileData.dogs, { ...dogForm }],
+        },
+      };
+    });
+
+    setDogForm(defaultDogForm);
+    setError('');
+    setSuccess('Pies został dodany do profilu.');
+    setScreen('user-profile');
   }
 
   function handleLogout() {
@@ -194,9 +357,27 @@ export default function App() {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setNickname('');
+    setDogForm(defaultDogForm);
     setError('');
     setSuccess('');
+  }
+
+  function handleDeleteAccount() {
+    if (!sessionEmail) {
+      return;
+    }
+
+    if (sessionEmail !== VALID_EMAIL) {
+      setUsers((currentUsers) => currentUsers.filter((user) => user.email !== sessionEmail));
+    }
+
+    setProfiles((currentProfiles) => {
+      const nextProfiles = { ...currentProfiles };
+      delete nextProfiles[sessionEmail];
+      return nextProfiles;
+    });
+
+    handleLogout();
   }
 
   function handleGoToRegister() {
@@ -210,6 +391,31 @@ export default function App() {
     setError('');
     setSuccess('');
     setConfirmPassword('');
+  }
+
+  function handleGoToDashboard() {
+    setScreen('dashboard');
+    setError('');
+    setSuccess('');
+  }
+
+  function handleGoToDogProfile() {
+    setScreen('dog-profile');
+    setError('');
+    setSuccess('');
+  }
+
+  function handleGoToUserProfile() {
+    setScreen('user-profile');
+    setError('');
+    setSuccess('');
+  }
+
+  function updateDogField<K extends keyof DogProfile>(key: K, value: DogProfile[K]) {
+    setDogForm((currentForm) => ({
+      ...currentForm,
+      [key]: value,
+    }));
   }
 
   return (
@@ -239,17 +445,22 @@ export default function App() {
             </article>
           </section>
 
+          <section className="dashboard-section dashboard-section--actions">
+            <button className="secondary-dashboard-button" type="button" onClick={handleGoToUserProfile}>
+              Mój profil
+            </button>
+            <button className="secondary-dashboard-button" type="button" onClick={handleGoToDogProfile}>
+              Uzupełnij profil psa
+            </button>
+          </section>
+
           <section className="dashboard-section">
             <h2>Umówione spacerki</h2>
             <div className="walk-list">
               {walkMeetups.map((meetup, index) => (
                 <article className="walk-card" key={`${meetup.name}-${index}`}>
                   <div className="walk-card__avatar">
-                    {meetup.avatar ? (
-                      <img src={meetup.avatar} alt="Piesek" />
-                    ) : (
-                      <span>{meetup.initials}</span>
-                    )}
+                    {meetup.avatar ? <img src={meetup.avatar} alt={meetup.name} /> : <span>{meetup.initials}</span>}
                   </div>
                   <div className="walk-card__content">
                     <h3>{meetup.name}</h3>
@@ -262,9 +473,13 @@ export default function App() {
           </section>
 
           <nav className="bottom-nav" aria-label="Nawigacja dolna">
-            <button type="button">👤</button>
+            <button type="button" onClick={handleGoToUserProfile}>
+              👤
+            </button>
             <button type="button">⌕</button>
-            <button type="button" className="active">⌂</button>
+            <button type="button" className="active" onClick={handleGoToDashboard}>
+              ⌂
+            </button>
             <button type="button">▭</button>
             <button type="button">⌂⌂</button>
           </nav>
@@ -272,6 +487,185 @@ export default function App() {
           <button className="logout-link" type="button" onClick={handleLogout}>
             Wyloguj się
           </button>
+        </section>
+      ) : screen === 'dog-profile' ? (
+        <section className="setup-card">
+          <header className="setup-header">
+            <h1>Poznajmy się!</h1>
+            <p>Uzupełnij profil zwierzaka</p>
+          </header>
+
+          <div className="profile-avatar profile-avatar--setup">
+            <ProfileAvatar badge />
+          </div>
+
+          <form className="setup-form" onSubmit={handleDogSubmit}>
+            <label className="field field--visible-label">
+              <span>Imię</span>
+              <input
+                type="text"
+                value={dogForm.name}
+                onChange={(event) => updateDogField('name', event.target.value)}
+                placeholder="Placeholder"
+              />
+            </label>
+
+            <label className="field field--visible-label">
+              <span>Rasa</span>
+              <input
+                type="text"
+                value={dogForm.breed}
+                onChange={(event) => updateDogField('breed', event.target.value)}
+                placeholder="Placeholder"
+              />
+            </label>
+
+            <div className="setup-grid">
+              <label className="field field--visible-label">
+                <span>Wiek</span>
+                <input
+                  type="text"
+                  value={dogForm.age}
+                  onChange={(event) => updateDogField('age', event.target.value)}
+                  placeholder="Placeholder"
+                />
+              </label>
+
+              <label className="field field--visible-label">
+                <span>Waga</span>
+                <input
+                  type="text"
+                  value={dogForm.weight}
+                  onChange={(event) => updateDogField('weight', event.target.value)}
+                  placeholder="Placeholder"
+                />
+              </label>
+            </div>
+
+            <div className="choice-group">
+              <span className="choice-group__label">Płeć</span>
+              <div className="choice-group__options">
+                {(['Samiec', 'Samiczka'] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={
+                      option === dogForm.gender
+                        ? 'choice-group__option choice-group__option--active'
+                        : 'choice-group__option'
+                    }
+                    onClick={() => updateDogField('gender', option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="choice-group">
+              <span className="choice-group__label">Poziom energii</span>
+              <div className="choice-group__options choice-group__options--three">
+                {(['Niski', 'Średni', 'Wysoki'] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={
+                      option === dogForm.energy
+                        ? 'choice-group__option choice-group__option--active'
+                        : 'choice-group__option'
+                    }
+                    onClick={() => updateDogField('energy', option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error ? <p className="error-message">{error}</p> : null}
+            {success ? <p className="success-message">{success}</p> : null}
+
+            <button className="primary-button" type="submit">
+              Dodaj psa
+            </button>
+
+            <button className="secondary-button" type="button" onClick={handleGoToUserProfile}>
+              Pomiń
+            </button>
+          </form>
+        </section>
+      ) : screen === 'user-profile' && currentProfile ? (
+        <section className="user-profile-shell">
+          <header className="user-profile-header">
+            <ProfileAvatar />
+            <h1>{currentProfile.displayName}</h1>
+            <button className="inline-link inline-link--header" type="button" onClick={handleGoToDogProfile}>
+              Edytuj profil
+            </button>
+          </header>
+
+          <section className="profile-block">
+            <h2>O mnie</h2>
+            <p>{currentProfile.about}</p>
+          </section>
+
+          <section className="profile-block">
+            <div className="profile-block__row">
+              <h2>Moje psy</h2>
+              <button className="pill-button" type="button" onClick={handleGoToDogProfile}>
+                + Dodaj psa
+              </button>
+            </div>
+
+            <div className="dog-list">
+              {currentProfile.dogs.length ? (
+                currentProfile.dogs.map((dog, index) => (
+                  <article className="dog-profile-card" key={`${dog.name}-${index}`}>
+                    <div className="dog-profile-card__avatar">
+                      <img src={dogAvatarDataUri()} alt={dog.name} />
+                    </div>
+                    <div className="dog-profile-card__content">
+                      <h3>{dog.name}</h3>
+                      <button className="pill-button pill-button--wide" type="button" onClick={handleGoToDogProfile}>
+                        Edytuj profil
+                      </button>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <article className="dog-profile-card dog-profile-card--empty">
+                  <div className="dog-profile-card__avatar dog-profile-card__avatar--empty">+</div>
+                  <div className="dog-profile-card__content">
+                    <h3>Brak psa w profilu</h3>
+                    <p>Dodaj pierwszego psa, aby zacząć łączyć się z innymi właścicielami.</p>
+                  </div>
+                </article>
+              )}
+            </div>
+          </section>
+
+          <div className="profile-divider" />
+
+          <div className="profile-actions">
+            <button className="primary-button" type="button" onClick={handleLogout}>
+              Wyloguj
+            </button>
+            <button className="secondary-button" type="button" onClick={handleDeleteAccount}>
+              Usuń konto
+            </button>
+          </div>
+
+          <nav className="bottom-nav bottom-nav--profile" aria-label="Nawigacja dolna">
+            <button type="button" onClick={handleGoToUserProfile} className="active">
+              👤
+            </button>
+            <button type="button">⌕</button>
+            <button type="button" onClick={handleGoToDashboard}>
+              ⌂
+            </button>
+            <button type="button">▭</button>
+            <button type="button">⌂⌂</button>
+          </nav>
         </section>
       ) : (
         <section className="login-card">
@@ -325,7 +719,10 @@ export default function App() {
               <div className="divider" />
 
               <p className="footer-copy">
-                Nie masz konta? <button className="inline-link" type="button" onClick={handleGoToRegister}>Zarejestruj się!</button>
+                Nie masz konta?{' '}
+                <button className="inline-link" type="button" onClick={handleGoToRegister}>
+                  Zarejestruj się!
+                </button>
               </p>
             </>
           ) : (
@@ -379,7 +776,10 @@ export default function App() {
               <div className="divider" />
 
               <p className="footer-copy">
-                Masz już konto? <button className="inline-link" type="button" onClick={handleGoToLogin}>Zaloguj się!</button>
+                Masz już konto?{' '}
+                <button className="inline-link" type="button" onClick={handleGoToLogin}>
+                  Zaloguj się!
+                </button>
               </p>
             </>
           )}
