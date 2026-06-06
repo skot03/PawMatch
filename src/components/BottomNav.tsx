@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface BottomNavProps {
-  activeTab: 'profile' | 'dashboard' | 'none';
+  activeTab: 'profile' | 'dashboard' | 'messages' | 'none';
   className?: string;
 }
 
@@ -18,8 +18,10 @@ export default function BottomNav({ activeTab, className = '' }: BottomNavProps)
       <button type="button" className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => navigate('/dashboard')}>
         ⌂
       </button>
-      <button type="button">▭</button>
-      <button type="button">⌂⌂</button>
+      <button type="button" className={activeTab === 'messages' ? 'active' : ''} onClick={() => navigate('/message-list')} >
+        ✉
+      </button>
+      <button type="button">◫</button>
     </nav>
   );
 }
