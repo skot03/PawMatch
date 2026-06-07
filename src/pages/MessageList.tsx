@@ -1,5 +1,4 @@
 import React from 'react';
-import BottomNav from '../components/BottomNav';
 
 const ImageIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d1c5b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,23 +18,20 @@ export default function MessageList() {
     ];
 
     const messages = [
-        { sender: 'Anna & Azor', text: 'To kiedy idziemy na ten spacer do parku?', time: '12:45', unread: false },
-        { sender: 'Marek & Rocky', text: 'Rocky już nie może się doczekać!', time: 'Wczoraj', unread: true },
-        { sender: 'Kasia & Figa', text: 'Czy Figa lubi inne suczki?', time: 'Pn', unread: false },
-        { sender: 'Tomek & Bruno', text: 'Dzięki za spacer, Bruno padł trupem :)', time: '22 Lip', unread: false },
+        { sender: 'Anna & Azor', text: 'To kiedy idziemy na ten spacer do parku?', time: '12:45', unread: false, type: 'gold' },
+        { sender: 'Marek & Rocky', text: 'Rocky już nie może się doczekać!', time: 'Wczoraj', unread: true, type: 'orange' },
+        { sender: 'Kasia & Figa', text: 'Czy Figa lubi inne suczki?', time: 'Pn', unread: false, type: 'green' },
+        { sender: 'Tomek & Bruno', text: 'Dzięki za spacer, Bruno padł trupem :)', time: '22 Lip', unread: false, type: 'gold' },
     ];
 
     return (
-        <section className="dashboard-shell">
-
-            <header className="dashboard-header" style={{ borderBottom: 'none', paddingBottom: '0' }}>
+        <section className="messages-shell">
+            <header className="messages-header">
                 <h1>Wiadomości</h1>
             </header>
 
-            <section className="dashboard-section" style={{ overflow: 'hidden' }}>
-                <h2 style={{ fontSize: '1.3rem', color: '#855a35', marginBottom: '8px' }}>
-                    Nowe Dopasowania
-                </h2>
+            <section>
+                <h2 className="section-title">Nowe Dopasowania</h2>
                 <div className="matches-scroll">
                     {newMatches.map((match, index) => (
                         <div className="match-avatar-wrapper" key={index}>
@@ -50,7 +46,7 @@ export default function MessageList() {
 
             <section className="messages-list">
                 {messages.map((msg, index) => (
-                    <article className="message-card" key={index}>
+                    <article className={`message-card message-card--${msg.type}`} key={index}>
                         <div className="message-card-avatar">
                             <ImageIcon />
                         </div>
@@ -66,8 +62,6 @@ export default function MessageList() {
                     </article>
                 ))}
             </section>
-
-            <BottomNav activeTab="messages" />
         </section>
     );
 }

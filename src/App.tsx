@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import DogProfile from './pages/DogProfile';
 import UserProfile from './pages/UserProfile';
 import MessageList from './pages/MessageList';
+import BottomNav from './components/BottomNav';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -16,7 +17,12 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   if (loading) return <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Ładowanie...</div>;
   if (!user) return <Navigate to="/" replace />;
   
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <BottomNav />
+    </>
+  );
 }
 
 export default function App() {

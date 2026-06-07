@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext, dogAvatarDataUri } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import ProfileAvatar from '../components/ProfileAvatar';
-import BottomNav from '../components/BottomNav';
 
 export default function UserProfile() {
   const context = useContext(AppContext);
@@ -26,7 +25,7 @@ export default function UserProfile() {
     <section className="user-profile-shell">
       <header className="user-profile-header">
         <ProfileAvatar />
-        <h1 style={{ fontSize: '1.8rem', marginTop: '8px' }}>{currentProfile.displayName}</h1>
+        <h1>{currentProfile.displayName}</h1>
         <button className="inline-link inline-link--header" type="button" onClick={() => navigate('/dog-profile')}>
           Edytuj profil
         </button>
@@ -83,7 +82,6 @@ export default function UserProfile() {
         </button>
       </div>
 
-      <BottomNav activeTab="profile" className="bottom-nav--profile" />
     </section>
   );
 }
