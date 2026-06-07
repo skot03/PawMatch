@@ -1,32 +1,33 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 import PawLogo from '../components/PawLogo';
 
 export default function Login() {
-  const context = useContext(AppContext);
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@admin.pl');
-  const [password, setPassword] = useState('admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  if (!context) return null;
-  const { users, setSessionEmail } = context;
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const normalizedEmail = email.trim().toLowerCase();
-    const matchedUser = users.find((user) => user.email === normalizedEmail);
-    const isValid = Boolean(matchedUser && matchedUser.password === password);
-
-    if (!isValid) {
-      setError('Nieprawidłowy e-mail lub hasło. Użyj admin@admin.pl / admin.');
-      return;
-    }
-
+  async function handleEmailLogin(e: React.FormEvent) {
+    e.preventDefault();
     setError('');
-    setSessionEmail(normalizedEmail);
-    navigate('/dashboard');
+    setBusy(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err: any) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Nieprawidłowy e-mail lub hasło.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Nieprawidłowy format adresu e-mail.');
+      } else {
+        setError('Wystąpił błąd podczas logowania.');
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -36,19 +37,18 @@ export default function Login() {
         <h1>PawMatch</h1>
       </div>
 
-      <p className="headline">Witaj!</p>
-      <p className="subheadline">Dołącz do nas i znajdź najlepszych kumpli dla swojego zwierzaka!</p>
+      <center><p className="headline">Witaj z powrotem!</p></center>
+      <center><p className="subheadline">Dołącz do nas i znajdź najlepszych kumpli dla swojego zwierzaka!</p></center>
 
-      <form className="login-form" onSubmit={handleSubmit}>
+      <form className="login-form" onSubmit={handleEmailLogin}>
         <label className="field">
           <span>Twój adres e-mail</span>
           <input
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="email"
-            inputMode="email"
-            placeholder="admin@admin.pl"
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Twój adres e-mail"
+            required
           />
         </label>
 
@@ -57,9 +57,9 @@ export default function Login() {
           <input
             type="password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            placeholder="admin"
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Hasło"
+            required
           />
         </label>
 
@@ -69,16 +69,16 @@ export default function Login() {
           </button>
         </div>
 
-        {error ? <p className="error-message">{error}</p> : null}
+        {error && <p className="error-message">{error}</p>}
 
-        <button className="primary-button" type="submit">
-          Zaloguj się
+        <button className="primary-button" type="submit" disabled={busy}>
+          {busy ? 'Logowanie...' : 'Zaloguj się'}
         </button>
       </form>
 
       <div className="divider" />
 
-      <p className="footer-copy">
+      <p className="footer-copy" style={{ textAlign: 'center' }}>
         Nie masz konta?{' '}
         <button className="inline-link" type="button" onClick={() => navigate('/register')}>
           Zarejestruj się!

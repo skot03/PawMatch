@@ -1,7 +1,5 @@
 import React, { createContext, useState, useEffect, useMemo, ReactNode } from 'react';
-
-export const VALID_EMAIL = 'admin@admin.pl';
-export const VALID_PASSWORD = 'admin';
+import { useAuth } from './AuthContext';
 
 export type DogMatch = {
   name: string;
@@ -26,18 +24,9 @@ export type UserProfileType = {
   dogs: DogProfile[];
 };
 
-export type UserRecord = {
-  email: string;
-  password: string;
-};
-
 export type ProfilesByEmail = Record<string, UserProfileType>;
 
-const STORAGE_KEY = 'pawmatch-users';
 const PROFILE_KEY = 'pawmatch-profiles';
-const SESSION_KEY = 'pawmatch-active-user';
-
-const defaultUsers: UserRecord[] = [{ email: VALID_EMAIL, password: VALID_PASSWORD }];
 
 export const defaultDogForm: DogProfile = {
   name: '',
@@ -83,109 +72,55 @@ function formatDisplayNameFromEmail(email: string) {
 }
 
 function createDefaultProfile(email: string): UserProfileType {
-  if (email === VALID_EMAIL) {
-    return {
-      displayName: 'Anna Kowalska',
-      about: 'Moje super bio blabla. Opis użytkownika itd. Dłuższy tekst dłuższy tekst.',
-      dogs: [
-        {
-          name: 'Max',
-          breed: 'Pomeranian',
-          age: '3 lata',
-          weight: '7 kg',
-          gender: 'Samiec',
-          energy: 'Niski',
-        },
-      ],
-    };
-  }
   return {
     displayName: formatDisplayNameFromEmail(email),
-    about: 'Dodaj kilka słów o sobie i o psach, które lubisz spotykać.',
-    dogs: [],
+    about: 'Moje super bio blabla. Opis użytkownika itd. Dłuższy tekst dłuższy tekst.',
+    dogs: [
+      {
+        name: 'Max',
+        breed: 'Pomeranian',
+        age: '3 lata',
+        weight: '7 kg',
+        gender: 'Samiec',
+        energy: 'Niski',
+      },
+    ],
   };
 }
 
-function readStoredUsers(): UserRecord[] {
-  if (typeof window === 'undefined') return defaultUsers;
-  const rawUsers = window.localStorage.getItem(STORAGE_KEY);
-  if (!rawUsers) return defaultUsers;
-  try {
-    const parsedUsers = JSON.parse(rawUsers) as UserRecord[];
-    return parsedUsers.length ? parsedUsers : defaultUsers;
-  } catch {
-    return defaultUsers;
-  }
-}
-
 function readStoredProfiles(): ProfilesByEmail {
-  if (typeof window === 'undefined') return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+  if (typeof window === 'undefined') return {};
   const rawProfiles = window.localStorage.getItem(PROFILE_KEY);
-  if (!rawProfiles) return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+  if (!rawProfiles) return {};
   try {
-    const parsedProfiles = JSON.parse(rawProfiles) as ProfilesByEmail;
-    return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL), ...parsedProfiles };
+    return JSON.parse(rawProfiles) as ProfilesByEmail;
   } catch {
-    return { [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL) };
+    return {};
   }
 }
 
 interface AppContextType {
-  users: UserRecord[];
-  setUsers: React.Dispatch<React.SetStateAction<UserRecord[]>>;
   profiles: ProfilesByEmail;
   setProfiles: React.Dispatch<React.SetStateAction<ProfilesByEmail>>;
   sessionEmail: string;
-  setSessionEmail: React.Dispatch<React.SetStateAction<string>>;
   currentProfile: UserProfileType | null;
   currentUserLabel: string;
-  handleLogout: () => void;
-  handleDeleteAccount: () => void;
+  handleDeleteAccount: () => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<UserRecord[]>(defaultUsers);
-  const [profiles, setProfiles] = useState<ProfilesByEmail>({
-    [VALID_EMAIL]: createDefaultProfile(VALID_EMAIL),
-  });
-  const [sessionEmail, setSessionEmail] = useState('');
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    const storedUsers = readStoredUsers();
-    const storedProfiles = readStoredProfiles();
-    setUsers(storedUsers);
-    setProfiles(
-      storedUsers.reduce<ProfilesByEmail>((accumulator, user) => {
-        accumulator[user.email] = storedProfiles[user.email] ?? createDefaultProfile(user.email);
-        return accumulator;
-      }, {})
-    );
+  const sessionEmail = user?.email || '';
 
-    const storedSession = window.localStorage.getItem(SESSION_KEY);
-    if (storedSession && storedUsers.some((user) => user.email === storedSession)) {
-      setSessionEmail(storedSession);
-    } else {
-      window.localStorage.removeItem(SESSION_KEY);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-  }, [users]);
+  const [profiles, setProfiles] = useState<ProfilesByEmail>(readStoredProfiles());
 
   useEffect(() => {
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
   }, [profiles]);
 
-  useEffect(() => {
-    if (sessionEmail) {
-      window.localStorage.setItem(SESSION_KEY, sessionEmail);
-    } else {
-      window.localStorage.removeItem(SESSION_KEY);
-    }
-  }, [sessionEmail]);
 
   const currentProfile = useMemo(() => {
     if (!sessionEmail) return null;
@@ -197,36 +132,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return currentProfile?.displayName ?? formatDisplayNameFromEmail(sessionEmail);
   }, [currentProfile, sessionEmail]);
 
-  function handleLogout() {
-    setSessionEmail('');
-    window.localStorage.removeItem(SESSION_KEY);
-  }
-
-  function handleDeleteAccount() {
+  async function handleDeleteAccount() {
     if (!sessionEmail) return;
-    if (sessionEmail !== VALID_EMAIL) {
-      setUsers((currentUsers) => currentUsers.filter((user) => user.email !== sessionEmail));
-    }
+
     setProfiles((currentProfiles) => {
       const nextProfiles = { ...currentProfiles };
       delete nextProfiles[sessionEmail];
       return nextProfiles;
     });
-    handleLogout();
+
+    if (logout) {
+      await logout();
+    }
   }
 
   return (
     <AppContext.Provider
       value={{
-        users,
-        setUsers,
         profiles,
         setProfiles,
         sessionEmail,
-        setSessionEmail,
         currentProfile,
         currentUserLabel,
-        handleLogout,
         handleDeleteAccount,
       }}
     >

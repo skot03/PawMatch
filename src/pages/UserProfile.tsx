@@ -1,15 +1,17 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext, dogAvatarDataUri } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import ProfileAvatar from '../components/ProfileAvatar';
 import BottomNav from '../components/BottomNav';
 
 export default function UserProfile() {
   const context = useContext(AppContext);
+  const { logout } = useAuth(); 
   const navigate = useNavigate();
 
   if (!context) return null;
-  const { currentProfile, handleLogout, handleDeleteAccount } = context;
+  const { currentProfile, handleDeleteAccount } = context;
 
   if (!currentProfile) {
     return (
@@ -24,7 +26,7 @@ export default function UserProfile() {
     <section className="user-profile-shell">
       <header className="user-profile-header">
         <ProfileAvatar />
-        <h1>{currentProfile.displayName}</h1>
+        <h1 style={{ fontSize: '1.8rem', marginTop: '8px' }}>{currentProfile.displayName}</h1>
         <button className="inline-link inline-link--header" type="button" onClick={() => navigate('/dog-profile')}>
           Edytuj profil
         </button>
@@ -73,10 +75,10 @@ export default function UserProfile() {
       <div className="profile-divider" />
 
       <div className="profile-actions">
-        <button className="primary-button" type="button" onClick={() => { handleLogout(); navigate('/'); }}>
+        <button className="primary-button" type="button" onClick={async () => { await logout(); navigate('/'); }}>
           Wyloguj
         </button>
-        <button className="secondary-button" type="button" onClick={() => { handleDeleteAccount(); navigate('/'); }}>
+        <button className="secondary-button" type="button" onClick={async () => { await handleDeleteAccount(); navigate('/'); }}>
           Usuń konto
         </button>
       </div>

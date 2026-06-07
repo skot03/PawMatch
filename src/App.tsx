@@ -1,6 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -8,21 +10,34 @@ import DogProfile from './pages/DogProfile';
 import UserProfile from './pages/UserProfile';
 import MessageList from './pages/MessageList';
 
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  
+  if (loading) return <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Ładowanie...</div>;
+  if (!user) return <Navigate to="/" replace />;
+  
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <AuthProvider>
       <AppProvider>
-        <main className="page-shell">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dog-profile" element={<DogProfile />} />
-            <Route path="/user-profile" element={<UserProfile />} />
-            <Route path="/message-list" element={<MessageList />} />
-          </Routes>
-        </main>
+        <BrowserRouter>
+          <main className="page-shell">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/dog-profile" element={<PrivateRoute><DogProfile /></PrivateRoute>} />
+              <Route path="/user-profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+              <Route path="/message-list" element={<PrivateRoute><MessageList /></PrivateRoute>} />
+              
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </BrowserRouter>
       </AppProvider>
-    </BrowserRouter>
+    </AuthProvider>
   );
 }

@@ -1,14 +1,16 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext, walkMeetups } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
 
 export default function Dashboard() {
   const context = useContext(AppContext);
+  const { logout } = useAuth(); 
   const navigate = useNavigate();
 
   if (!context) return null;
-  const { currentUserLabel, handleLogout } = context;
+  const { currentUserLabel } = context;
 
   return (
     <section className="dashboard-shell">
@@ -64,7 +66,7 @@ export default function Dashboard() {
 
       <BottomNav activeTab="dashboard" />
 
-      <button className="logout-link" type="button" onClick={() => { handleLogout(); navigate('/'); }}>
+      <button className="logout-link" type="button" onClick={async () => { await logout(); navigate('/'); }}>
         Wyloguj się
       </button>
     </section>
