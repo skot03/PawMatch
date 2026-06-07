@@ -17,6 +17,7 @@ export default function Login() {
     setBusy(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigate('/dashboard');
     } catch (err: any) {
       if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         setError('Nieprawidłowy e-mail lub hasło.');

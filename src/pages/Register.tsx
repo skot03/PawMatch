@@ -29,6 +29,7 @@ export default function Register() {
     setBusy(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      navigate('/dog-profile');
     } catch (err: any) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Konto z takim adresem e-mail już istnieje.');
