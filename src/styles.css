@@ -47,6 +47,7 @@ button {
   display: grid;
   gap: 16px;
   color: #2d2219;
+  max-height: 720px;
 }
 
 .dashboard-header {
@@ -218,12 +219,21 @@ button {
   box-shadow: 0 14px 28px rgba(53, 34, 20, 0.2);
 }
 
+.bottom-nav img {
+  width: 30px;
+  height: 30px;
+}
+
 .bottom-nav button {
   height: 32px;
   border: 0;
   background: transparent;
   color: #f8ede0;
-  font-size: 1.3rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
 }
 
 .bottom-nav button.active {
@@ -268,12 +278,6 @@ button {
   font-size: clamp(2.6rem, 8vw, 3.25rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
-}
-
-.paw-logo {
-  width: 118px;
-  height: 118px;
-  color: #7b5225;
 }
 
 .tone-1 {
