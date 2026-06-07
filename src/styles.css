@@ -408,8 +408,8 @@ button {
   transition: color 0.2s ease;
 }
 
-.bottom-nav button.active {
-  color: #d9b07f;
+.bottom-nav button.active img {
+  filter: brightness(0) saturate(100%) invert(79%) sepia(12%) saturate(1450%) hue-rotate(347deg) brightness(89%) contrast(84%);
 }
 
 .paw-logo {

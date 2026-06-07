@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext, walkMeetups } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import BottomNav from '../components/BottomNav';
+
+import iconCircleRight from '../assets/icon-circle-right.svg';
+import iconClock from '../assets/icon-clock.svg';
 
 export default function Dashboard() {
   const context = useContext(AppContext);
-  const { logout } = useAuth(); 
-  const navigate = useNavigate();
 
   if (!context) return null;
   const { currentUserLabel } = context;
@@ -16,34 +16,30 @@ export default function Dashboard() {
     <section className="dashboard-shell">
       <header className="dashboard-header">
         <h1>Cześć, {currentUserLabel}!</h1>
-        <p>Masz teraz dostęp do swoich dopasowań, mapy i spacerów.</p>
       </header>
 
       <section className="dashboard-action-grid" aria-label="Skróty aplikacji">
         <article className="action-card action-card--gold">
           <span className="action-card__label">Masz</span>
           <strong>12 dopasowań</strong>
-          <span className="action-card__arrow">→</span>
+          <span className="action-card__arrow">
+            <img src={iconCircleRight} alt="Przejdź" />
+          </span>
         </article>
         <article className="action-card action-card--orange">
           <span className="action-card__label">Twoja okolica</span>
           <strong>Mapa</strong>
-          <span className="action-card__arrow">→</span>
+          <span className="action-card__arrow">
+            <img src={iconCircleRight} alt="Przejdź" />
+          </span>
         </article>
         <article className="action-card action-card--green">
           <span className="action-card__label">Znajdź partnera</span>
           <strong>Eksploruj</strong>
-          <span className="action-card__arrow">→</span>
+          <span className="action-card__arrow">
+            <img src={iconCircleRight} alt="Przejdź" />
+          </span>
         </article>
-      </section>
-
-      <section className="dashboard-section dashboard-section--actions">
-        <button className="secondary-dashboard-button" type="button" onClick={() => navigate('/user-profile')}>
-          Mój profil
-        </button>
-        <button className="secondary-dashboard-button" type="button" onClick={() => navigate('/dog-profile')}>
-          Uzupełnij profil psa
-        </button>
       </section>
 
       <section className="dashboard-section">
@@ -57,18 +53,16 @@ export default function Dashboard() {
               <div className="walk-card__content">
                 <h3>{meetup.name}</h3>
                 <p>{meetup.owner}</p>
-                <span>◔ {meetup.time}</span>
+                <span className="walk-card__time">
+                  <img src={iconClock} alt="" className="walk-card__icon" />
+                  {meetup.time}
+                </span>
               </div>
             </article>
           ))}
         </div>
       </section>
 
-      <BottomNav activeTab="dashboard" />
-
-      <button className="logout-link" type="button" onClick={async () => { await logout(); navigate('/'); }}>
-        Wyloguj się
-      </button>
     </section>
   );
 }

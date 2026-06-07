@@ -1,22 +1,28 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-import iconProfile from '../assets/icon-profile.png';
-import iconSearch from '../assets/icon-search.png';
-import iconHome from '../assets/icon-home.png';
-import iconMessage from '../assets/icon-message.png';
-import iconMap from '../assets/icon-map.png';
+import iconProfile from '../assets/icon-profile.svg';
+import iconSearch from '../assets/icon-search.svg';
+import iconHome from '../assets/icon-home.svg';
+import iconMessage from '../assets/icon-message.svg';
+import iconMap from '../assets/icon-map.svg';
 
-interface BottomNavProps {
-  activeTab: 'profile' | 'dashboard' | 'messages' | 'map' | 'none';
-  className?: string;
-}
-
-export default function BottomNav({ activeTab, className = '' }: BottomNavProps) {
+export default function BottomNav() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path === '/user-profile') return 'profile';
+    if (path === '/dashboard') return 'dashboard';
+    if (path === '/message-list') return 'messages';
+    return 'none';
+  };
+
+  const activeTab = getActiveTab();
 
   return (
-    <nav className={`bottom-nav ${className}`} aria-label="Nawigacja dolna">
+    <nav className="bottom-nav" aria-label="Nawigacja dolna">
       <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => navigate('/user-profile')}>
         <img src={iconProfile} alt="Profil" />
       </button>
@@ -33,7 +39,7 @@ export default function BottomNav({ activeTab, className = '' }: BottomNavProps)
         <img src={iconMessage} alt="Wiadomości" />
       </button>
 
-      <button className={activeTab === 'map' ? 'active' : ''} onClick={() => navigate('/dashboard')}>
+      <button onClick={() => navigate('/dashboard')}>
         <img src={iconMap} alt="Mapa" />
       </button>
     </nav>
