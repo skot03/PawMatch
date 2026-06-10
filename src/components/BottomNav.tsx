@@ -14,6 +14,7 @@ export default function BottomNav() {
   const getActiveTab = () => {
     const path = location.pathname;
     if (path === '/user-profile') return 'profile';
+    if (path === '/search') return 'search';
     if (path === '/dashboard') return 'dashboard';
     if (path === '/message-list') return 'messages';
     return 'none';
@@ -27,7 +28,7 @@ export default function BottomNav() {
         <img src={iconProfile} alt="Profil" />
       </button>
 
-      <button onClick={() => navigate('/dashboard')}>
+      <button className={activeTab === 'search' ? 'active' : ''} onClick={() => navigate('/search')}>
         <img src={iconSearch} alt="Szukaj" />
       </button>
 

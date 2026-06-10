@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import DogProfile from './pages/DogProfile';
 import UserProfile from './pages/UserProfile';
 import MessageList from './pages/MessageList';
+import Search from './pages/Search';
 import BottomNav from './components/BottomNav';
 import AnalyticsListener from "./components/AnalyticsListener";
 
@@ -49,6 +50,7 @@ export default function App() {
               <Route path="/" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
               <Route path="/dog-profile" element={<PrivateRoute><DogProfile /></PrivateRoute>} />
               <Route path="/user-profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
               <Route path="/message-list" element={<PrivateRoute><MessageList /></PrivateRoute>} />
