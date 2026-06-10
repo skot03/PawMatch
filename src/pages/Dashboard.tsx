@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext, walkMeetups } from '../context/AppContext';
-import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 
 import iconCircleRight from '../assets/icon-circle-right.svg';
@@ -9,6 +8,8 @@ import iconClock from '../assets/icon-clock.svg';
 
 export default function Dashboard() {
   const context = useContext(AppContext);
+
+  const navigate = useNavigate();
 
   if (!context) return null;
   const { currentUserLabel } = context;
