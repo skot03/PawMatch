@@ -13,6 +13,7 @@ import UserProfile from './pages/UserProfile';
 import MessageList from './pages/MessageList';
 import Search from './pages/Search';
 import Map from './pages/Map';
+import DogProfileView from './pages/DogProfileView';
 import UserSettings from './pages/UserSettings';
 import Chat from './pages/Chat';
 import BottomNav from './components/BottomNav';
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
               <Route path="/map" element={<PrivateRoute><Map /></PrivateRoute>} />
               <Route path="/dog-profile" element={<PrivateRoute><DogProfile /></PrivateRoute>} />
+              <Route path="/dog-view" element={<PrivateRoute><DogProfileView /></PrivateRoute>} />
               <Route path="/user-profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
               <Route path="/user-settings" element={<PrivateRoute><UserSettings /></PrivateRoute>} />
               <Route path="/message-list" element={<PrivateRoute><MessageList /></PrivateRoute>} />
