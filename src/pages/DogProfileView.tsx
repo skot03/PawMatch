@@ -1,6 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { dogAvatarDataUri } from '../context/AppContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/DogProfile.css';
 
 const mockedDog = {
@@ -13,10 +12,14 @@ const mockedDog = {
   location: 'Warszawa, Mokotów',
   description:
     'Burek to wulkan energii, który kocha długie spacery po lesie i aportowanie. Jest niezwykle inteligentny i szybko uczy się nowych sztuczek. Szuka towarzysza, który dotrzyma mu kroku podczas porannych przebieżek.',
+  traits: ['Energiczny', 'Przyjacielski', 'Inteligentny', 'Ciekawski'],
 };
 
 export default function DogProfileView() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const stateDog = (location.state as { dog?: typeof mockedDog } | null)?.dog;
+  const dog = stateDog ?? mockedDog;
 
   return (
     <section className="dog-profile-view-shell">
@@ -27,12 +30,12 @@ export default function DogProfileView() {
       <article className="dog-profile-view-hero">
         <div
           className="dog-profile-view-hero-image"
-          style={{ backgroundImage: `url(${dogAvatarDataUri()})` }}
+          style={{ backgroundImage: `url(${dog.image ?? ''})` }}
         />
         <div className="dog-profile-view-hero-overlay">
           <div>
-            <h1>{mockedDog.name}</h1>
-            <p className="dog-profile-view-location">{mockedDog.location}</p>
+            <h1>{dog.name}</h1>
+            <p className="dog-profile-view-location">{dog.location}</p>
           </div>
         </div>
       </article>
@@ -40,30 +43,31 @@ export default function DogProfileView() {
       <div className="dog-profile-view-attrs">
         <article className="dog-profile-view-attr-card">
           <span>Rasa</span>
-          <strong>{mockedDog.breed}</strong>
+          <strong>{dog.breed}</strong>
         </article>
         <article className="dog-profile-view-attr-card">
           <span>Waga</span>
-          <strong>{mockedDog.weight}</strong>
+          <strong>{dog.weight}</strong>
         </article>
         <article className="dog-profile-view-attr-card">
           <span>Płeć</span>
-          <strong>{mockedDog.gender}</strong>
+          <strong>{dog.gender}</strong>
         </article>
       </div>
 
       <section className="dog-profile-view-section">
         <h2>O mnie</h2>
-        <p>{mockedDog.description}</p>
+        <p>{dog.description}</p>
       </section>
 
       <section className="dog-profile-view-section">
         <h2>Cechy charakteru</h2>
         <div className="dog-profile-view-tags">
-          <span className="dog-profile-view-tag">Energiczny</span>
-          <span className="dog-profile-view-tag">Przyjacielski</span>
-          <span className="dog-profile-view-tag">Inteligentny</span>
-          <span className="dog-profile-view-tag">Ciekawski</span>
+          {dog.traits.map((trait) => (
+            <span key={trait} className="dog-profile-view-tag">
+              {trait}
+            </span>
+          ))}
         </div>
       </section>
     </section>
