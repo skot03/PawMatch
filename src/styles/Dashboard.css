@@ -1,0 +1,196 @@
+.dashboard-shell {
+  width: 100%;
+  flex: 1;
+  padding: 14px 18px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #2d2219;
+}
+
+.dashboard-header {
+  padding: 6px 12px 2px;
+  border-bottom: 1px solid rgba(176, 141, 97, 0.2);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: #2b2017;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  margin: 10px 0 0;
+  color: #826343;
+  font-size: 0.95rem;
+}
+
+.dashboard-section {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.dashboard-section h2 {
+  margin: 0;
+  color: #1F150A;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.dashboard-action-grid {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.dashboard-section--actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.secondary-dashboard-button {
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #eadcc4;
+  color: #6d4a25;
+  font-weight: 700;
+}
+
+.action-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  min-height: 98px;
+  padding: 16px;
+  border-radius: 16px;
+  color: #FAF6F0;
+}
+
+.action-card strong {
+  font-family: 'Calistoga', serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.action-card__label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.action-card__arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-card__arrow img {
+  width: 40px;
+  height: 40px;
+}
+
+.walk-card__time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #000000;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.walk-card__icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0);
+}
+
+.action-card--gold {
+  background: #654520;
+}
+
+.action-card--orange {
+  background: #B96D40;
+}
+
+.action-card--green {
+  background: #429E7E;
+}
+
+.walk-list {
+  display: grid;
+  gap: 10px;
+}
+
+.walk-card {
+  display: grid;
+  grid-template-columns: 73px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: transparent;
+  border: 3px solid #E8DCC8;
+  border-radius: 16px;
+}
+
+.walk-card__avatar {
+  width: 73px;
+  height: 73px;
+  border-radius: 100px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #d9955d 0%, #c87543 100%);
+  color: #fff9f1;
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.walk-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.walk-card__content h3 {
+  margin: 0;
+  color: #654520;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.walk-card__content p {
+  margin: 4px 0 2px;
+  color: #B96D40;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.walk-card__content span {
+  color: #6d4a25;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 420px) {
+  .dashboard-section--actions {
+    grid-template-columns: 1fr;
+  }
+}

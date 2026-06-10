@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext, dogAvatarDataUri } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import ProfileAvatar from '../components/ProfileAvatar';
+import '../styles/UserProfile.css';
 
 export default function UserProfile() {
   const context = useContext(AppContext);

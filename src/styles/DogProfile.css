@@ -1,0 +1,47 @@
+.setup-card {
+  width: 100%;
+  flex: 1;
+  padding: 28px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.setup-header {
+  text-align: center;
+}
+
+.setup-header h1 {
+  margin: 0;
+  color: #5a3a18;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 8vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.setup-header p {
+  margin: 8px 0 0;
+  color: #6d4a25;
+  font-size: 1rem;
+}
+
+.setup-form {
+  display: grid;
+  gap: 16px;
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 420px) {
+  .setup-card {
+    padding: 22px 16px 18px;
+  }
+
+  .setup-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext, defaultDogForm, DogProfile as DogProfileType } from '../context/AppContext';
 import ProfileAvatar from '../components/ProfileAvatar';
+import '../styles/DogProfile.css';
 
 export default function DogProfile() {
   const context = useContext(AppContext);
