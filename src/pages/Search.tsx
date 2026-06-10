@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Search.css';
 
+import { mockedDogs } from '../data/mockedDogs';
 import iconFilter from '../assets/icon-filter.svg';
 import iconInfo from '../assets/icon-info.svg';
 import iconMap from '../assets/icon-map.svg';
@@ -12,6 +13,38 @@ export default function Search() {
   const navigate = useNavigate();
   const [size, setSize] = useState<'Małe' | 'Średnie' | 'Duże'>('Małe');
   const [gender, setGender] = useState<'Samiczka' | 'Samiec'>('Samiec');
+  const [currentDogIndex, setCurrentDogIndex] = useState(0);
+  const [likedDogs, setLikedDogs] = useState<Record<string, boolean>>({});
+
+  const filteredDogs = useMemo(
+    () => mockedDogs.filter((dog) => dog.size === size && dog.gender === gender),
+    [size, gender],
+  );
+
+  useEffect(() => {
+    setCurrentDogIndex(0);
+  }, [size, gender]);
+
+  const currentDog = filteredDogs[currentDogIndex] || null;
+  const isLiked = currentDog ? Boolean(likedDogs[currentDog.id]) : false;
+
+  function goNextDog() {
+    if (!filteredDogs.length) return;
+    setCurrentDogIndex((currentIndex) => (currentIndex + 1) % filteredDogs.length);
+  }
+
+  function handleSkip() {
+    goNextDog();
+  }
+
+  function handleLike() {
+    if (!currentDog) return;
+    setLikedDogs((prev) => ({
+      ...prev,
+      [currentDog.id]: !prev[currentDog.id],
+    }));
+    goNextDog();
+  }
 
   return (
     <section className="search-shell">
@@ -61,27 +94,51 @@ export default function Search() {
       </div>
 
       <article className="search-card">
-        <div className="search-card-image"></div>
+        <div
+          className="search-card-image"
+          style={{ backgroundImage: currentDog ? `url(${currentDog.image})` : 'none' }}
+        />
         
-        <button className="search-card-info-btn" type="button" onClick={() => navigate('/dog-view')}>
+        <button
+          className="search-card-info-btn"
+          type="button"
+          onClick={() => navigate('/dog-view', { state: { dog: currentDog } })}
+          disabled={!currentDog}
+        >
           <img src={iconInfo} alt="Info" />
         </button>
-        
-        <div className="search-card-overlay">
-          <h1 className="search-card-name">Burek</h1>
-          <div className="search-card-location">
-            <img src={iconMap} alt="" className="search-card-location-icon" />
-            Warszawa, Mokotów
+        {currentDog ? (
+          <div className="search-card-overlay">
+            <h1 className="search-card-name">{currentDog.name}</h1>
+            <div className="search-card-location">
+              <img src={iconMap} alt="" className="search-card-location-icon" />
+              {currentDog.location}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="search-card-overlay" style={{ justifyContent: 'center' }}>
+            <h1 className="search-card-name">Brak psów</h1>
+            <p style={{ color: '#FAF6F0', margin: 0 }}>Brak psów dla wybranych filtrów.</p>
+          </div>
+        )}
       </article>
 
       <div className="search-actions">
-        <button className="search-action-btn search-action-btn--cancel">
+        <button
+          className="search-action-btn search-action-btn--cancel"
+          type="button"
+          onClick={handleSkip}
+          disabled={!currentDog}
+        >
           <img src={iconCancel} alt="Anuluj" />
         </button>
-        <button className="search-action-btn search-action-btn--like">
-          <img src={iconFavourite} alt="Lubię" />
+        <button
+          className="search-action-btn search-action-btn--like"
+          type="button"
+          onClick={handleLike}
+          disabled={!currentDog}
+        >
+          <img src={iconFavourite} alt={isLiked ? 'Polubione' : 'Lubię'} />
         </button>
       </div>
     </section>
