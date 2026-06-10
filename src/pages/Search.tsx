@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Search.css';
 
 import iconFilter from '../assets/icon-filter.svg';
@@ -8,6 +9,7 @@ import iconCancel from '../assets/icon-cancel.svg';
 import iconFavourite from '../assets/icon-favourite.svg';
 
 export default function Search() {
+  const navigate = useNavigate();
   const [size, setSize] = useState<'Małe' | 'Średnie' | 'Duże'>('Małe');
   const [gender, setGender] = useState<'Samiczka' | 'Samiec'>('Samiec');
 
@@ -61,12 +63,12 @@ export default function Search() {
       <article className="search-card">
         <div className="search-card-image"></div>
         
-        <button className="search-card-info-btn">
+        <button className="search-card-info-btn" type="button" onClick={() => navigate('/dog-view')}>
           <img src={iconInfo} alt="Info" />
         </button>
         
         <div className="search-card-overlay">
-          <h1 className="search-card-name">Luna</h1>
+          <h1 className="search-card-name">Burek</h1>
           <div className="search-card-location">
             <img src={iconMap} alt="" className="search-card-location-icon" />
             Warszawa, Mokotów
