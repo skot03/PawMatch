@@ -14,6 +14,7 @@ import MessageList from './pages/MessageList';
 import Search from './pages/Search';
 import Map from './pages/Map';
 import UserSettings from './pages/UserSettings';
+import Chat from './pages/Chat';
 import BottomNav from './components/BottomNav';
 import AnalyticsListener from "./components/AnalyticsListener";
 
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="/user-profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
               <Route path="/user-settings" element={<PrivateRoute><UserSettings /></PrivateRoute>} />
               <Route path="/message-list" element={<PrivateRoute><MessageList /></PrivateRoute>} />
+              <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

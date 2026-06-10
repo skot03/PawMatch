@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/MessageList.css';
 
 const ImageIcon = () => (
@@ -10,6 +11,7 @@ const ImageIcon = () => (
 );
 
 export default function MessageList() {
+    const navigate = useNavigate();
     const newMatches = [
         { name: 'Luna' },
         { name: 'Burek' },
@@ -47,7 +49,7 @@ export default function MessageList() {
 
             <section className="messages-list">
                 {messages.map((msg, index) => (
-                    <article className={`message-card message-card--${msg.type}`} key={index}>
+                    <article className={`message-card message-card--${msg.type}`} key={index} onClick={() => navigate('/chat')} style={{ cursor: 'pointer' }}>
                         <div className="message-card-avatar">
                             <ImageIcon />
                         </div>
