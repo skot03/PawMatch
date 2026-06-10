@@ -17,6 +17,7 @@ export default function BottomNav() {
     if (path === '/search') return 'search';
     if (path === '/dashboard') return 'dashboard';
     if (path === '/message-list') return 'messages';
+    if (path === '/map') return 'map';
     return 'none';
   };
 
@@ -40,7 +41,7 @@ export default function BottomNav() {
         <img src={iconMessage} alt="Wiadomości" />
       </button>
 
-      <button onClick={() => navigate('/dashboard')}>
+      <button className={activeTab === 'map' ? 'active' : ''} onClick={() => navigate('/map')}>
         <img src={iconMap} alt="Mapa" />
       </button>
     </nav>

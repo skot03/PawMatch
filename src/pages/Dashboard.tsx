@@ -27,14 +27,14 @@ export default function Dashboard() {
             <img src={iconCircleRight} alt="Przejdź" />
           </span>
         </article>
-        <article className="action-card action-card--orange">
+        <article className="action-card action-card--orange" onClick={() => navigate('/map')} style={{ cursor: 'pointer' }}>
           <span className="action-card__label">Twoja okolica</span>
           <strong>Mapa</strong>
           <span className="action-card__arrow">
             <img src={iconCircleRight} alt="Przejdź" />
           </span>
         </article>
-        <article className="action-card action-card--green">
+        <article className="action-card action-card--green" onClick={() => navigate('/search')} style={{ cursor: 'pointer' }}>
           <span className="action-card__label">Znajdź partnera</span>
           <strong>Eksploruj</strong>
           <span className="action-card__arrow">
