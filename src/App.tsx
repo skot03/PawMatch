@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import ReactGA from "react-ga4";
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -10,6 +11,9 @@ import DogProfile from './pages/DogProfile';
 import UserProfile from './pages/UserProfile';
 import MessageList from './pages/MessageList';
 import BottomNav from './components/BottomNav';
+import AnalyticsListener from "./components/AnalyticsListener";
+
+ReactGA.initialize("G-BNELMWTGHS");
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -30,6 +34,8 @@ export default function App() {
     <AuthProvider>
       <AppProvider>
         <BrowserRouter>
+          <AnalyticsListener />
+          
           <main className="page-shell">
             <Routes>
               <Route path="/" element={<Login />} />
