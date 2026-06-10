@@ -7,7 +7,7 @@ import '../styles/UserProfile.css';
 
 export default function UserProfile() {
   const context = useContext(AppContext);
-  const { logout } = useAuth(); 
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   if (!context) return null;
@@ -27,7 +27,7 @@ export default function UserProfile() {
       <header className="user-profile-header">
         <ProfileAvatar />
         <h1>{currentProfile.displayName}</h1>
-        <button className="inline-link inline-link--header" type="button" onClick={() => navigate('/dog-profile')}>
+        <button className="inline-link inline-link--header" type="button" onClick={() => navigate('/user-settings')}>
           Edytuj profil
         </button>
       </header>
